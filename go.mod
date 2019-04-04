@@ -1,3 +1,3 @@
 module github.com/ankye/queue
 
-go 1.12
+go 1.11
