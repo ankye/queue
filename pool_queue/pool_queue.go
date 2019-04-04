@@ -1,4 +1,4 @@
-package queuepool
+package pool_queue
 
 import (
 	"sync"
@@ -66,8 +66,8 @@ func (n *Node) reset() {
 	n.next = nil
 }
 
-//Queue struct
-type Queue struct {
+//PoolQueue struct
+type PoolQueue struct {
 	head      *Node
 	end       *Node
 	node_pool *nodePool
@@ -76,8 +76,8 @@ type Queue struct {
 }
 
 //NewQueue create queue instance
-func NewQueue(capaciity int) *Queue {
-	q := &Queue{
+func NewQueue(capaciity int) *PoolQueue {
+	q := &PoolQueue{
 		head:      nil,
 		end:       nil,
 		node_pool: newNodePool(),
@@ -87,12 +87,12 @@ func NewQueue(capaciity int) *Queue {
 }
 
 //Init queue init
-func (q *Queue) Init(capaciity int) bool {
+func (q *PoolQueue) Init(capaciity int) bool {
 	return true
 }
 
 //Put push one object to queue
-func (q *Queue) Put(data interface{}) bool {
+func (q *PoolQueue) Put(data interface{}) bool {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 	n := q.node_pool.Get()
@@ -111,7 +111,7 @@ func (q *Queue) Put(data interface{}) bool {
 }
 
 //Get get one object from queue
-func (q *Queue) Get() (interface{}, bool) {
+func (q *PoolQueue) Get() (interface{}, bool) {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 	if q.head == nil {
@@ -131,12 +131,12 @@ func (q *Queue) Get() (interface{}, bool) {
 }
 
 //Length objects count in queue
-func (q *Queue) Length() int {
+func (q *PoolQueue) Length() int {
 	return q.c
 }
 
 //Empty queue is empty return true else return false
-func (q *Queue) Empty() bool {
+func (q *PoolQueue) Empty() bool {
 	if q.head == nil {
 		return true
 	}

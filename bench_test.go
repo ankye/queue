@@ -6,13 +6,13 @@ import (
 	"testing"
 
 	"github.com/ankye/queue"
-	"github.com/ankye/queue/chan_quque"
-	"github.com/ankye/queue/queuearray"
-	"github.com/ankye/queue/queuepool"
+	"github.com/ankye/queue/array_queue"
+	"github.com/ankye/queue/chan_queue"
+	"github.com/ankye/queue/pool_queue"
 )
 
 func Benchmark_Queue1(b *testing.B) {
-	queue := queuearray.NewQueue(1000)
+	queue := array_queue.NewQueue(1000)
 	pushNum := 5
 	num := b.N
 	// num := 10000000
@@ -36,7 +36,7 @@ func Benchmark_Queue1(b *testing.B) {
 }
 
 func Benchmark_Queue2(b *testing.B) {
-	queue := queuepool.NewQueue(1000)
+	queue := pool_queue.NewQueue(1000)
 	pushNum := 5
 	num := b.N
 	// num := 10000000
@@ -60,7 +60,7 @@ func Benchmark_Queue2(b *testing.B) {
 }
 
 func Benchmark_Queue3(b *testing.B) {
-	queue := chan_quque.NewQueue(1000)
+	queue := chan_queue.NewQueue(1000)
 	pushNum := 5
 	num := b.N
 	// num := 10000000
@@ -108,26 +108,26 @@ func test_queue(q queue.IQueue, size int) bool {
 	return true
 }
 
-func Test_Queue1(t *testing.T) {
-	q := queuepool.NewQueue(1000)
+func Test_PoolQueue(t *testing.T) {
+	q := pool_queue.NewQueue(1000)
 	r := test_queue(q, 10000)
 	if r == false {
-		t.Error("queuepool error")
+		t.Error("pool queue error")
 	}
 }
 
-func Test_Queue2(t *testing.T) {
-	q := queuearray.NewQueue(1000)
+func Test_ArrayQueue(t *testing.T) {
+	q := array_queue.NewQueue(1000)
 	r := test_queue(q, 10000)
 	if r == false {
-		t.Error("queuearray error")
+		t.Error("array queue error")
 	}
 }
 
-func Test_Queue3(t *testing.T) {
-	q := chan_quque.NewQueue(20000)
+func Test_ChanQueue(t *testing.T) {
+	q := chan_queue.NewQueue(20000)
 	r := test_queue(q, 10000)
 	if r == false {
-		t.Error("queuepool error")
+		t.Error("chan queue error")
 	}
 }

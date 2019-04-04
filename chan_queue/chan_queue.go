@@ -1,4 +1,4 @@
-package chan_quque
+package chan_queue
 
 type ChanQueue struct {
 	innerChan chan interface{}

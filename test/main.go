@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/ankye/queue"
-	"github.com/ankye/queue/queuearray"
-	"github.com/ankye/queue/queuepool"
+	"github.com/ankye/queue/array_queue"
+	"github.com/ankye/queue/pool_queue"
 )
 
 const TIME = 9999999
@@ -49,10 +49,10 @@ func doTest(q queue.IQueue) {
 	wg.Wait()
 }
 func main() {
-	queue1 := queuearray.NewQueue(1000)
+	queue1 := array_queue.NewQueue(1000)
 	doTest(queue1)
 
-	queue2 := queuepool.NewQueue(1000)
+	queue2 := pool_queue.NewQueue(1000)
 	doTest(queue2)
 
 }
