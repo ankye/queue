@@ -7,14 +7,15 @@ import (
 // Queue for
 type Queue struct {
 	queue []interface{}
-	Len   chan chan int
-	lock  sync.Mutex
+	//Len   chan chan int
+	lock sync.Mutex
 }
 
 func NewQueue(capaciity int) *Queue {
 	q := &Queue{
 		queue: make([]interface{}, 0, 100),
-		Len:   make(chan chan int)}
+		//	Len:   make(chan chan int)
+	}
 
 	return q
 }
@@ -30,10 +31,9 @@ func (q *Queue) Get() (val interface{}, ok bool) {
 		return nil, false
 	}
 
-	n := len(q.queue)
-	x := q.queue[n-1]
-	q.queue = q.queue[0 : n-1]
-
+	//n := len(q.queue)
+	x := q.queue[0]
+	q.queue = q.queue[1:]
 	return x, true
 }
 

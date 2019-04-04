@@ -120,7 +120,7 @@ func Test_Queue2(t *testing.T) {
 	q := queuearray.NewQueue(1000)
 	r := test_queue(q, 10000)
 	if r == false {
-		t.Error("queuepool error")
+		t.Error("queuearray error")
 	}
 }
 
