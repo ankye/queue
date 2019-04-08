@@ -2,12 +2,15 @@ package array_queue
 
 import (
 	"errors"
+	"runtime"
 	"sync"
+	"time"
 )
 
 var ErrQueueFull = errors.New("Queue is full")
 var ErrQueueEmpty = errors.New("Queue is empty")
 var ErrQueueIsClosed = errors.New("Queue is Closed")
+var ErrQueueIsTimeout = errors.New("Timeout in queue")
 
 // Queue for
 type ArrayQueue struct {
@@ -33,19 +36,23 @@ func (q *ArrayQueue) Init(capacity int) error {
 
 func (q *ArrayQueue) Get() (interface{}, error) {
 
-	if q.IsClosed() {
-		return nil, ErrQueueIsClosed
-	}
+	var i int
+	for start := time.Now(); ; {
 
-	if len(q.queue) == 0 {
-		return nil, ErrQueueEmpty
+		if i>>3 == 1 {
+			i = 1
+			if time.Since(start) > time.Second*15 {
+				return nil, ErrQueueIsTimeout
+			}
+			runtime.Gosched()
+		}
+		i++
+		if v, err := q.AsyncGet(); err == nil {
+			return v, nil
+		} else if err == ErrQueueIsClosed {
+			return nil, err
+		}
 	}
-	q.lock.Lock()
-	defer q.lock.Unlock()
-
-	x := q.queue[0]
-	q.queue = q.queue[1:]
-	return x, nil
 }
 
 //AsyncGet 异步读队列
@@ -65,20 +72,29 @@ func (q *ArrayQueue) AsyncGet() (interface{}, error) {
 
 func (q *ArrayQueue) Put(x interface{}) error {
 
-	if len, err := q.Length(); err == nil {
-		if len >= q.capacity {
-			return ErrQueueFull
+	var i int
+	for start := time.Now(); ; {
+
+		if i>>3 == 1 {
+			i = 1
+			if time.Since(start) > time.Second*15 {
+				return ErrQueueIsTimeout
+			}
+			runtime.Gosched()
 		}
-	} else {
-		return err
+		i++
+		if err := q.AsyncPut(x); err == nil {
+			return nil
+		} else if err == ErrQueueIsClosed {
+			return err
+		}
 	}
-	q.lock.Lock()
-	defer q.lock.Unlock()
-	q.queue = append(q.queue, x)
-	return nil
 }
 
 func (q *ArrayQueue) AsyncPut(x interface{}) error {
+	if q.IsClosed() {
+		return ErrQueueIsClosed
+	}
 	if len, err := q.Length(); err == nil {
 		if len >= q.capacity {
 			return ErrQueueFull
