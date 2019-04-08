@@ -7,6 +7,7 @@ import (
 
 	"github.com/ankye/queue"
 	"github.com/ankye/queue/array_queue"
+	"github.com/ankye/queue/chan_queue"
 	"github.com/ankye/queue/pool_queue"
 )
 
@@ -15,18 +16,20 @@ const TIME = 9999999
 var wg sync.WaitGroup
 
 func push(q queue.IQueue) {
+	defer wg.Done()
 	for i := 0; i < TIME; i++ {
 		q.Put(i)
 	}
-	wg.Done()
+
 }
 func pop(q queue.IQueue, pushNum int) {
+	defer wg.Done()
 	count := 0
 	start1 := time.Now()
 	sum := 0
 	for i := 0; i < 100*TIME; i++ {
-		v, ok := q.Get()
-		if ok && v != nil {
+		v, err := q.AsyncGet()
+		if err == nil && v != nil {
 			sum += v.(int)
 			count++
 		}
@@ -37,22 +40,29 @@ func pop(q queue.IQueue, pushNum int) {
 	fmt.Println(sum)
 	start2 := time.Since(start1)
 	fmt.Println(start2)
-	wg.Done()
+
 }
 func doTest(q queue.IQueue) {
 	pushNum := 5
 	wg.Add(pushNum + 1)
+
 	for i := 0; i < pushNum; i++ {
 		go push(q)
 	}
 	go pop(q, pushNum)
+
 	wg.Wait()
+
 }
 func main() {
+	capacity := 1000
 	queue1 := array_queue.NewQueue(1000)
 	doTest(queue1)
 
 	queue2 := pool_queue.NewQueue(1000)
 	doTest(queue2)
+
+	queue3 := chan_queue.NewQueue(capacity)
+	doTest(queue3)
 
 }
