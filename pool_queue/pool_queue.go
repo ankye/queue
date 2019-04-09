@@ -1,8 +1,11 @@
 package pool_queue
 
 import (
-	"errors"
+	"runtime"
 	"sync"
+	"time"
+
+	. "github.com/ankye/queue/error"
 )
 
 var node_pool *sync.Pool = &sync.Pool{New: func() interface{} { return new(Node) }}
@@ -10,11 +13,7 @@ var p_pool *sync.Pool = &sync.Pool{New: func() interface{} { return make([]*Node
 
 const NODE_POOL_CELL_COUNT = 8
 const NODE_POOL_MAX_COUNT = 4096
-
-var ErrQueueFull = errors.New("Queue is full")
-var ErrQueueEmpty = errors.New("Queue is empty")
-var ErrQueueIsClosed = errors.New("Queue is Closed")
-var ErrQueueTimeout = errors.New("Timeout waiting on queue")
+const TIMEOUT = time.Second * 15
 
 type nodePool struct {
 	p []*Node
@@ -77,7 +76,7 @@ type PoolQueue struct {
 	head       *Node
 	end        *Node
 	node_pool  *nodePool
-	c          int
+	size       int
 	lock       sync.Mutex
 	closedChan chan struct{}
 	capacity   int
@@ -89,7 +88,7 @@ func NewQueue(capacity int) *PoolQueue {
 		head:       nil,
 		end:        nil,
 		node_pool:  newNodePool(),
-		c:          0,
+		size:       0,
 		capacity:   capacity,
 		closedChan: make(chan struct{}),
 	}
@@ -102,47 +101,51 @@ func (q *PoolQueue) Init(capaciity int) error {
 }
 
 //Put push one object to queue
-func (q *PoolQueue) Put(data interface{}) error {
-	q.lock.Lock()
-	defer q.lock.Unlock()
-	n := q.node_pool.Get()
-	n.data = data
-	n.next = nil
-	if q.end == nil {
-		q.head = n
-		q.end = n
-	} else {
-		q.end.next = n
-		q.end = n
+func (q *PoolQueue) Put(x interface{}) error {
+	var i int
+	for start := time.Now(); ; {
+		if i>>3 == 1 {
+			i = 1
+			if time.Since(start) > TIMEOUT {
+				return ErrQueueTimeout
+			}
+			runtime.Gosched()
+		}
+		i++
+		if err := q.AsyncPut(x); err == nil {
+			return nil
+		} else if err == ErrQueueIsClosed {
+			return err
+		}
 	}
-	q.c++
-
-	return nil
 }
 
 //Get get one object from queue
+
 func (q *PoolQueue) Get() (interface{}, error) {
-	q.lock.Lock()
-	defer q.lock.Unlock()
-	if q.head == nil {
-		return nil, ErrQueueEmpty
-	}
 
-	n := q.head
-	data := n.data
-	q.head = n.next
-	if q.head == nil {
-		q.end = nil
-	}
-	q.c--
-	q.node_pool.Put(n)
+	var i int
+	for start := time.Now(); ; {
 
-	return data, nil
+		if i>>3 == 1 {
+			i = 1
+			if time.Since(start) > TIMEOUT {
+				return nil, ErrQueueTimeout
+			}
+			runtime.Gosched()
+		}
+		i++
+		if v, err := q.AsyncGet(); err == nil {
+			return v, nil
+		} else if err == ErrQueueIsClosed {
+			return nil, err
+		}
+	}
 }
 
 //Length objects count in queue
 func (q *PoolQueue) Length() (int, error) {
-	return q.c, nil
+	return q.size, nil
 }
 
 //Empty queue is empty return true else return false
@@ -154,12 +157,52 @@ func (q *PoolQueue) Empty() bool {
 }
 
 func (q *PoolQueue) AsyncPut(data interface{}) error {
-	return q.Put(data)
+	if q.IsClosed() {
+		return ErrQueueIsClosed
+	}
+
+	q.lock.Lock()
+	defer q.lock.Unlock()
+	if q.size >= q.capacity {
+		return ErrQueueFull
+	}
+	n := q.node_pool.Get()
+	n.data = data
+	n.next = nil
+	if q.end == nil {
+		q.head = n
+		q.end = n
+	} else {
+		q.end.next = n
+		q.end = n
+	}
+	q.size++
+
+	return nil
 }
 
 //AsyncGet 异步读队列
 func (q *PoolQueue) AsyncGet() (interface{}, error) {
-	return q.Get()
+	if q.IsClosed() {
+		return nil, ErrQueueIsClosed
+	}
+	q.lock.Lock()
+	defer q.lock.Unlock()
+
+	if q.head == nil {
+		return nil, ErrQueueEmpty
+	}
+
+	n := q.head
+	data := n.data
+	q.head = n.next
+	if q.head == nil {
+		q.end = nil
+	}
+	q.size--
+	q.node_pool.Put(n)
+
+	return data, nil
 }
 
 //Capacity 队列大小

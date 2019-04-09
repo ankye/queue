@@ -1,10 +1,13 @@
 package chan_queue
 
 import (
-	"errors"
 	"sync/atomic"
 	"time"
+
+	. "github.com/ankye/queue/error"
 )
+
+const TIMEOUT = time.Second * 15
 
 type ChanQueue struct {
 	innerChan  chan interface{}
@@ -13,11 +16,6 @@ type ChanQueue struct {
 	timer      *time.Timer
 	closedChan chan struct{}
 }
-
-var ErrQueueFull = errors.New("Queue is full")
-var ErrQueueEmpty = errors.New("Queue is empty")
-var ErrQueueIsClosed = errors.New("Queue is Closed")
-var ErrQueueTimeout = errors.New("Timeout waiting on queue")
 
 func NewQueue(capacity int) *ChanQueue {
 	return &ChanQueue{

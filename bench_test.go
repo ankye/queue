@@ -28,8 +28,8 @@ func Benchmark_Queue1(b *testing.B) {
 	}
 	idx := 0
 	for idx < num*pushNum {
-		_, ok := queue.Get()
-		if ok {
+		_, err := queue.Get()
+		if err == nil {
 			idx += 1
 		}
 	}
@@ -52,8 +52,8 @@ func Benchmark_Queue2(b *testing.B) {
 	}
 	idx := 0
 	for idx < num*pushNum {
-		_, ok := queue.Get()
-		if ok {
+		_, err := queue.Get()
+		if err == nil {
 			idx += 1
 		}
 	}
@@ -76,8 +76,8 @@ func Benchmark_Queue3(b *testing.B) {
 	}
 	idx := 0
 	for idx < num*pushNum {
-		_, ok := queue.Get()
-		if ok {
+		_, err := queue.Get()
+		if err == nil {
 			idx += 1
 		}
 	}
@@ -94,10 +94,15 @@ func genRandomList(size int) []int {
 func test_queue(q queue.IQueue, size int) bool {
 	list := genRandomList(size)
 	fmt.Printf("test_queue, %d\n", size)
-	for _, v := range list {
-		// fmt.Printf("put, %d\n", v)
-		q.Put(v)
-	}
+
+	go func() {
+		for _, v := range list {
+			// fmt.Printf("put, %d\n", v)
+			q.Put(v)
+		}
+
+	}()
+
 	for _, v := range list {
 		v2, _ := q.Get()
 		if v != v2 {
@@ -105,6 +110,7 @@ func test_queue(q queue.IQueue, size int) bool {
 			return false
 		}
 	}
+
 	return true
 }
 
@@ -125,7 +131,7 @@ func Test_ArrayQueue(t *testing.T) {
 }
 
 func Test_ChanQueue(t *testing.T) {
-	q := chan_queue.NewQueue(20000)
+	q := chan_queue.NewQueue(1000)
 	r := test_queue(q, 10000)
 	if r == false {
 		t.Error("chan queue error")

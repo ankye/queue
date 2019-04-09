@@ -1,16 +1,14 @@
 package array_queue
 
 import (
-	"errors"
 	"runtime"
 	"sync"
 	"time"
+
+	. "github.com/ankye/queue/error"
 )
 
-var ErrQueueFull = errors.New("Queue is full")
-var ErrQueueEmpty = errors.New("Queue is empty")
-var ErrQueueIsClosed = errors.New("Queue is Closed")
-var ErrQueueIsTimeout = errors.New("Timeout in queue")
+const TIMEOUT = time.Second * 15
 
 // Queue for
 type ArrayQueue struct {
@@ -41,8 +39,8 @@ func (q *ArrayQueue) Get() (interface{}, error) {
 
 		if i>>3 == 1 {
 			i = 1
-			if time.Since(start) > time.Second*15 {
-				return nil, ErrQueueIsTimeout
+			if time.Since(start) > TIMEOUT {
+				return nil, ErrQueueTimeout
 			}
 			runtime.Gosched()
 		}
@@ -71,14 +69,12 @@ func (q *ArrayQueue) AsyncGet() (interface{}, error) {
 }
 
 func (q *ArrayQueue) Put(x interface{}) error {
-
 	var i int
 	for start := time.Now(); ; {
-
 		if i>>3 == 1 {
 			i = 1
-			if time.Since(start) > time.Second*15 {
-				return ErrQueueIsTimeout
+			if time.Since(start) > TIMEOUT {
+				return ErrQueueTimeout
 			}
 			runtime.Gosched()
 		}
