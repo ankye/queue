@@ -5,10 +5,10 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/ankye/queue"
-	"github.com/ankye/queue/array_queue"
-	"github.com/ankye/queue/chan_queue"
-	"github.com/ankye/queue/pool_queue"
+	"github.com/gonethopper/queue"
+	"github.com/gonethopper/queue/array_queue"
+	"github.com/gonethopper/queue/chan_queue"
+	"github.com/gonethopper/queue/pool_queue"
 )
 
 func Benchmark_Queue1(b *testing.B) {
@@ -91,7 +91,7 @@ func genRandomList(size int) []int {
 	return list
 }
 
-func test_queue(q queue.IQueue, size int) bool {
+func test_queue(q queue.Queue, size int) bool {
 	list := genRandomList(size)
 	fmt.Printf("test_queue, %d\n", size)
 

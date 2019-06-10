@@ -1,7 +1,7 @@
 package queue
 
-//IQueue interface define
-type IQueue interface {
+//Queue interface define
+type Queue interface {
 	Init(capacity int) error
 	//Put 阻塞写队列
 	Put(data interface{}) error

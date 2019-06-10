@@ -5,17 +5,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ankye/queue"
-	"github.com/ankye/queue/array_queue"
-	"github.com/ankye/queue/chan_queue"
-	"github.com/ankye/queue/pool_queue"
+	"github.com/gonethopper/queue"
+	"github.com/gonethopper/queue/array_queue"
+	"github.com/gonethopper/queue/chan_queue"
+	"github.com/gonethopper/queue/pool_queue"
 )
 
 const TIME = 10000000
 
 var wg sync.WaitGroup
 
-func push(q queue.IQueue) {
+func push(q queue.Queue) {
 	defer wg.Done()
 	for i := 0; i < TIME; i++ {
 		if err := q.Put(i); err != nil {
@@ -24,7 +24,7 @@ func push(q queue.IQueue) {
 	}
 
 }
-func pop(q queue.IQueue, pushNum int) {
+func pop(q queue.Queue, pushNum int) {
 	defer wg.Done()
 	count := 0
 	start1 := time.Now()
@@ -45,7 +45,7 @@ func pop(q queue.IQueue, pushNum int) {
 	fmt.Println(start2)
 
 }
-func doTest(q queue.IQueue) {
+func doTest(q queue.Queue) {
 	pushNum := 5
 	wg.Add(pushNum + 1)
 

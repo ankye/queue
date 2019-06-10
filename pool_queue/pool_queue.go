@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	. "github.com/ankye/queue/error"
+	. "github.com/gonethopper/queue/error"
 )
 
 var node_pool *sync.Pool = &sync.Pool{New: func() interface{} { return new(Node) }}

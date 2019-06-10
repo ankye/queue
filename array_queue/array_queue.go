@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	. "github.com/ankye/queue/error"
+	. "github.com/gonethopper/queue/error"
 )
 
 const TIMEOUT = time.Second * 15
