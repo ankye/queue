@@ -8,7 +8,6 @@ import (
 	"github.com/gonethopper/queue"
 	"github.com/gonethopper/queue/array_queue"
 	"github.com/gonethopper/queue/chan_queue"
-	"github.com/gonethopper/queue/pool_queue"
 )
 
 const TIME = 10000000
@@ -62,10 +61,7 @@ func main() {
 	queue1 := array_queue.NewQueue(capacity)
 	doTest(queue1)
 
-	queue2 := pool_queue.NewQueue(capacity)
+	queue2 := chan_queue.NewQueue(capacity)
 	doTest(queue2)
-
-	queue3 := chan_queue.NewQueue(capacity)
-	doTest(queue3)
 
 }
