@@ -1,16 +1,12 @@
-package array_queue
+package queue
 
 import (
 	"runtime"
 	"sync"
 	"time"
-
-	. "github.com/gonethopper/queue/error"
 )
 
-const TIMEOUT = time.Second * 15
-
-// Queue for
+//ArrayQueue for
 type ArrayQueue struct {
 	queue      []interface{}
 	capacity   int
@@ -18,13 +14,13 @@ type ArrayQueue struct {
 	closedChan chan struct{}
 }
 
-func NewQueue(capacity int) *ArrayQueue {
+//NewArrayQueue create ArrayQueue instance
+func NewArrayQueue(capacity int) Queue {
 	q := &ArrayQueue{
 		queue:      make([]interface{}, 0, capacity),
 		capacity:   capacity,
 		closedChan: make(chan struct{}),
 	}
-
 	return q
 }
 

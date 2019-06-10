@@ -1,5 +1,7 @@
 package queue
 
+import "time"
+
 //Queue interface define
 type Queue interface {
 	Init(capacity int) error
@@ -20,3 +22,6 @@ type Queue interface {
 	//IsClosed 队列是否已经关闭 关闭返回true,否则返回false
 	IsClosed() bool
 }
+
+
+const TIMEOUT = time.Second * 15

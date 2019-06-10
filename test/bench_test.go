@@ -6,12 +6,10 @@ import (
 	"testing"
 
 	"github.com/gonethopper/queue"
-	"github.com/gonethopper/queue/array_queue"
-	"github.com/gonethopper/queue/chan_queue"
 )
 
 func Benchmark_Queue1(b *testing.B) {
-	queue := array_queue.NewQueue(1000)
+	queue := queue.NewArrayQueue(1000)
 	pushNum := 5
 	num := b.N
 	// num := 10000000
@@ -35,7 +33,7 @@ func Benchmark_Queue1(b *testing.B) {
 }
 
 func Benchmark_Queue2(b *testing.B) {
-	queue := chan_queue.NewQueue(1000)
+	queue := queue.NewChanQueue(1000)
 	pushNum := 5
 	num := b.N
 	// num := 10000000
@@ -90,7 +88,7 @@ func test_queue(q queue.Queue, size int) bool {
 }
 
 func Test_ArrayQueue(t *testing.T) {
-	q := array_queue.NewQueue(1000)
+	q := queue.NewArrayQueue(1000)
 	r := test_queue(q, 10000)
 	if r == false {
 		t.Error("array queue error")
@@ -98,7 +96,7 @@ func Test_ArrayQueue(t *testing.T) {
 }
 
 func Test_ChanQueue(t *testing.T) {
-	q := chan_queue.NewQueue(1000)
+	q := queue.NewChanQueue(1000)
 	r := test_queue(q, 10000)
 	if r == false {
 		t.Error("chan queue error")

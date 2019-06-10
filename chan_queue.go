@@ -1,13 +1,10 @@
-package chan_queue
+package queue
 
 import (
 	"sync/atomic"
 	"time"
-
-	. "github.com/gonethopper/queue/error"
 )
 
-const TIMEOUT = time.Second * 15
 
 type ChanQueue struct {
 	innerChan  chan interface{}
@@ -17,7 +14,7 @@ type ChanQueue struct {
 	closedChan chan struct{}
 }
 
-func NewQueue(capacity int) *ChanQueue {
+func NewChanQueue(capacity int) Queue {
 	return &ChanQueue{
 		innerChan:  make(chan interface{}, capacity),
 		capacity:   capacity,
