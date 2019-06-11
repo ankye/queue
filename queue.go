@@ -14,14 +14,13 @@ type Queue interface {
 	//AsyncGet 异步读队列
 	AsyncGet() (interface{}, error)
 	//Capacity 队列大小
-	Capacity() (int, error)
+	Capacity() int
 	//队列占用数量
-	Length() (int, error)
+	Length() int
 	//Close 关闭队列
 	Close() error
 	//IsClosed 队列是否已经关闭 关闭返回true,否则返回false
 	IsClosed() bool
 }
-
 
 const TIMEOUT = time.Second * 15

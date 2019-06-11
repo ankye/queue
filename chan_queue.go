@@ -5,7 +5,6 @@ import (
 	"time"
 )
 
-
 type ChanQueue struct {
 	innerChan  chan interface{}
 	capacity   int
@@ -76,18 +75,12 @@ func (q *ChanQueue) AsyncPut(x interface{}) error {
 	}
 }
 
-func (q *ChanQueue) Length() (int, error) {
-	if q.IsClosed() {
-		return 0, ErrQueueIsClosed
-	}
-	return int(q.size), nil
+func (q *ChanQueue) Length() int {
+	return int(q.size)
 }
 
-func (q *ChanQueue) Capacity() (int, error) {
-	if q.IsClosed() {
-		return 0, ErrQueueIsClosed
-	}
-	return q.capacity, nil
+func (q *ChanQueue) Capacity() int {
+	return q.capacity
 }
 
 //Close 不需要关闭innerChan,交给GC回收,多写的时候直接关闭innerChan会出问题

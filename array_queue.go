@@ -87,26 +87,24 @@ func (q *ArrayQueue) AsyncPut(x interface{}) error {
 	if q.IsClosed() {
 		return ErrQueueIsClosed
 	}
-	if len, err := q.Length(); err == nil {
-		if len >= q.capacity {
-			return ErrQueueFull
-		}
-	} else {
-		return err
+
+	if q.Length() >= q.capacity {
+		return ErrQueueFull
 	}
+
 	q.lock.Lock()
 	defer q.lock.Unlock()
 	q.queue = append(q.queue, x)
 	return nil
 }
 
-func (q *ArrayQueue) Length() (int, error) {
-	return len(q.queue), nil
+func (q *ArrayQueue) Length() int {
+	return len(q.queue)
 }
 
 //Capacity 队列大小
-func (q *ArrayQueue) Capacity() (int, error) {
-	return q.capacity, nil
+func (q *ArrayQueue) Capacity() int {
+	return q.capacity
 }
 
 func (q *ArrayQueue) Close() error {
