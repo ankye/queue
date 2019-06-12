@@ -1,30 +1,31 @@
 package queue
 
 import (
+	"container/list"
 	"runtime"
 	"sync"
 	"time"
 )
 
-//ArrayQueue for
-type ArrayQueue struct {
-	queue      []interface{}
+// ListQueue for
+type ListQueue struct {
+	queue      *list.List
 	capacity   int
 	lock       sync.Mutex
 	closedChan chan struct{}
 }
 
-//NewArrayQueue create ArrayQueue instance
-func NewArrayQueue(capacity int) Queue {
-	q := &ArrayQueue{
-		queue:      make([]interface{}, 0, capacity),
+// NewListQueue create ListQueue instance
+func NewListQueue(capacity int) Queue {
+	q := &ListQueue{
+		queue:      list.New(),
 		capacity:   capacity,
 		closedChan: make(chan struct{}),
 	}
 	return q
 }
 
-func (q *ArrayQueue) Pop() (interface{}, error) {
+func (q *ListQueue) Pop() (interface{}, error) {
 
 	var i int
 	for start := time.Now(); ; {
@@ -46,23 +47,22 @@ func (q *ArrayQueue) Pop() (interface{}, error) {
 }
 
 // AsyncPop 异步读队列
-func (q *ArrayQueue) AsyncPop() (interface{}, error) {
+func (q *ListQueue) AsyncPop() (interface{}, error) {
 	if q.IsClosed() {
 		return nil, ErrQueueIsClosed
 	}
 	q.lock.Lock()
 	defer q.lock.Unlock()
-
-	if len(q.queue) == 0 {
+	if q.queue.Len() == 0 {
 		return nil, ErrQueueEmpty
 	}
 
-	x := q.queue[0]
-	q.queue = q.queue[1:]
-	return x, nil
+	x := q.queue.Front() // 取出链表第一个元素
+	q.queue.Remove(x)
+	return x.Value, nil
 }
 
-func (q *ArrayQueue) Push(x interface{}) error {
+func (q *ListQueue) Push(x interface{}) error {
 	var i int
 	for start := time.Now(); ; {
 		if i>>3 == 1 {
@@ -81,29 +81,32 @@ func (q *ArrayQueue) Push(x interface{}) error {
 	}
 }
 
-func (q *ArrayQueue) AsyncPush(x interface{}) error {
+func (q *ListQueue) AsyncPush(x interface{}) error {
 	if q.IsClosed() {
 		return ErrQueueIsClosed
 	}
+
 	q.lock.Lock()
 	defer q.lock.Unlock()
-	if q.Length() >= q.capacity {
+
+	if q.queue.Len() >= q.capacity {
 		return ErrQueueFull
 	}
-	q.queue = append(q.queue, x)
+
+	q.queue.PushBack(x)
 	return nil
 }
 
-func (q *ArrayQueue) Length() int {
-	return len(q.queue)
+func (q *ListQueue) Length() int {
+	return q.queue.Len()
 }
 
 //Capacity 队列大小
-func (q *ArrayQueue) Capacity() int {
+func (q *ListQueue) Capacity() int {
 	return q.capacity
 }
 
-func (q *ArrayQueue) Close() error {
+func (q *ListQueue) Close() error {
 	if q.IsClosed() {
 		return ErrQueueIsClosed
 	}
@@ -111,7 +114,7 @@ func (q *ArrayQueue) Close() error {
 	return nil
 }
 
-func (q *ArrayQueue) IsClosed() bool {
+func (q *ListQueue) IsClosed() bool {
 	select {
 	case <-q.closedChan:
 		return true

@@ -23,11 +23,7 @@ func NewChanQueue(capacity int) Queue {
 	}
 }
 
-func (q *ChanQueue) Init(capacity int) error {
-	return nil
-}
-
-func (q *ChanQueue) Get() (val interface{}, err error) {
+func (q *ChanQueue) Pop() (val interface{}, err error) {
 
 	v, ok := <-q.innerChan
 	if ok {
@@ -37,7 +33,7 @@ func (q *ChanQueue) Get() (val interface{}, err error) {
 	return nil, ErrQueueIsClosed
 
 }
-func (q *ChanQueue) AsyncGet() (val interface{}, err error) {
+func (q *ChanQueue) AsyncPop() (val interface{}, err error) {
 
 	select {
 	case v, ok := <-q.innerChan:
@@ -51,7 +47,7 @@ func (q *ChanQueue) AsyncGet() (val interface{}, err error) {
 	}
 
 }
-func (q *ChanQueue) Put(x interface{}) error {
+func (q *ChanQueue) Push(x interface{}) error {
 
 	if q.IsClosed() {
 		return ErrQueueIsClosed
@@ -61,7 +57,7 @@ func (q *ChanQueue) Put(x interface{}) error {
 	return nil
 }
 
-func (q *ChanQueue) AsyncPut(x interface{}) error {
+func (q *ChanQueue) AsyncPush(x interface{}) error {
 
 	if q.IsClosed() {
 		return ErrQueueIsClosed
@@ -103,7 +99,7 @@ func (q *ChanQueue) IsClosed() bool {
 
 }
 
-func (q *ChanQueue) GetChan(timeout time.Duration) (<-chan interface{}, <-chan error) {
+func (q *ChanQueue) getChan(timeout time.Duration) (<-chan interface{}, <-chan error) {
 	timeoutChan := make(chan error, 1)
 	resultChan := make(chan interface{}, 1)
 	go func() {
