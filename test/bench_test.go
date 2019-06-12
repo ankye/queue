@@ -3,81 +3,51 @@ package queue_test
 import (
 	"fmt"
 	"math/rand"
+	"sync"
 	"testing"
 
 	"github.com/gonethopper/queue"
 )
 
-func Benchmark_ArrayQueue(b *testing.B) {
-	queue := queue.NewArrayQueue(1000)
+func bench_sync(q queue.Queue) {
+	var wg sync.WaitGroup
+	num := 1000000
 	pushNum := 5
-	num := b.N
-	// num := 10000000
-	// var wg sync.WaitGroup
+	wg.Add(pushNum + 1)
 	for i := 0; i < pushNum; i++ {
-		// wg.Add(1)
-		go func(l int) {
-			for i := 0; i < l; i++ {
-				queue.Push(i)
+		go func(num int) {
+			for j := 0; j < num; j++ {
+				q.Push(j)
 			}
-			// wg.Done()
+			wg.Done()
 		}(num)
 	}
-	idx := 0
-	for idx < num*pushNum {
-		_, err := queue.Pop()
-		if err == nil {
-			idx += 1
+	go func() {
+		idx := 0
+		for idx < num*pushNum {
+			_, err := q.Pop()
+			if err == nil {
+				idx += 1
+			}
 		}
-	}
+		wg.Done()
+	}()
+	wg.Wait()
+}
+
+func Benchmark_ArrayQueue(b *testing.B) {
+	q := queue.NewArrayQueue(1000)
+	bench_sync(q)
 }
 
 func Benchmark_ListQueue(b *testing.B) {
-	queue := queue.NewListQueue(1000)
-	pushNum := 5
-	num := b.N
-	// num := 10000000
-	// var wg sync.WaitGroup
-	for i := 0; i < pushNum; i++ {
-		// wg.Add(1)
-		go func(l int) {
-			for i := 0; i < l; i++ {
-				queue.Push(i)
-			}
-			// wg.Done()
-		}(num)
-	}
-	idx := 0
-	for idx < num*pushNum {
-		_, err := queue.Pop()
-		if err == nil {
-			idx += 1
-		}
-	}
+	q := queue.NewListQueue(1000)
+	bench_sync(q)
 }
 
 func Benchmark_ChanQueue(b *testing.B) {
-	queue := queue.NewChanQueue(1000)
-	pushNum := 5
-	num := b.N
-	// num := 10000000
-	// var wg sync.WaitGroup
-	for i := 0; i < pushNum; i++ {
-		// wg.Add(1)
-		go func(l int) {
-			for i := 0; i < l; i++ {
-				queue.Push(i)
-			}
-			// wg.Done()
-		}(num)
-	}
-	idx := 0
-	for idx < num*pushNum {
-		_, err := queue.Pop()
-		if err == nil {
-			idx += 1
-		}
-	}
+	q := queue.NewChanQueue(1000)
+	bench_sync(q)
 }
 func genRandomList(size int) []int {
 	list := make([]int, size)
