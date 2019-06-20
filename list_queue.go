@@ -10,13 +10,13 @@ import (
 // ListQueue for
 type ListQueue struct {
 	queue      *list.List
-	capacity   int
+	capacity   int32
 	lock       sync.Mutex
 	closedChan chan struct{}
 }
 
 // NewListQueue create ListQueue instance
-func NewListQueue(capacity int) Queue {
+func NewListQueue(capacity int32) Queue {
 	q := &ListQueue{
 		queue:      list.New(),
 		capacity:   capacity,
@@ -89,7 +89,7 @@ func (q *ListQueue) AsyncPush(x interface{}) error {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 
-	if q.queue.Len() >= q.capacity {
+	if q.Length() >= q.capacity {
 		return ErrQueueFull
 	}
 
@@ -97,12 +97,12 @@ func (q *ListQueue) AsyncPush(x interface{}) error {
 	return nil
 }
 
-func (q *ListQueue) Length() int {
-	return q.queue.Len()
+func (q *ListQueue) Length() int32 {
+	return int32(q.queue.Len())
 }
 
 //Capacity 队列大小
-func (q *ListQueue) Capacity() int {
+func (q *ListQueue) Capacity() int32 {
 	return q.capacity
 }
 

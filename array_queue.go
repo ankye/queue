@@ -9,13 +9,13 @@ import (
 //ArrayQueue for
 type ArrayQueue struct {
 	queue      []interface{}
-	capacity   int
+	capacity   int32
 	lock       sync.Mutex
 	closedChan chan struct{}
 }
 
 //NewArrayQueue create ArrayQueue instance
-func NewArrayQueue(capacity int) Queue {
+func NewArrayQueue(capacity int32) Queue {
 	q := &ArrayQueue{
 		queue:      make([]interface{}, 0, capacity),
 		capacity:   capacity,
@@ -94,12 +94,12 @@ func (q *ArrayQueue) AsyncPush(x interface{}) error {
 	return nil
 }
 
-func (q *ArrayQueue) Length() int {
-	return len(q.queue)
+func (q *ArrayQueue) Length() int32 {
+	return int32(len(q.queue))
 }
 
 //Capacity 队列大小
-func (q *ArrayQueue) Capacity() int {
+func (q *ArrayQueue) Capacity() int32 {
 	return q.capacity
 }
 

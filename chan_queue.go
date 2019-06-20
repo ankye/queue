@@ -7,13 +7,13 @@ import (
 
 type ChanQueue struct {
 	innerChan  chan interface{}
-	capacity   int
+	capacity   int32
 	size       int32
 	timer      *time.Timer
 	closedChan chan struct{}
 }
 
-func NewChanQueue(capacity int) Queue {
+func NewChanQueue(capacity int32) Queue {
 	return &ChanQueue{
 		innerChan:  make(chan interface{}, capacity),
 		capacity:   capacity,
@@ -71,11 +71,11 @@ func (q *ChanQueue) AsyncPush(x interface{}) error {
 	}
 }
 
-func (q *ChanQueue) Length() int {
-	return int(q.size)
+func (q *ChanQueue) Length() int32 {
+	return q.size
 }
 
-func (q *ChanQueue) Capacity() int {
+func (q *ChanQueue) Capacity() int32 {
 	return q.capacity
 }
 

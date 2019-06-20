@@ -13,9 +13,9 @@ type Queue interface {
 	// AsyncPop 异步读队列
 	AsyncPop() (interface{}, error)
 	// Capacity 队列大小
-	Capacity() int
+	Capacity() int32
 	// Length 队列占用数量
-	Length() int
+	Length() int32
 	// Close 关闭队列
 	Close() error
 	// IsClosed 队列是否已经关闭 关闭返回true,否则返回false
